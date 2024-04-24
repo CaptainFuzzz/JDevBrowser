@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+
+<?import javafx.scene.control.Button?>
+<VBox  fx:id="root" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.project.BrowserController">
+
+
+    <Label fx:id="clockLabel" text="00:00:00" />
+    <Button fx:id="themeToggleButton" text="Toggle Theme" onAction="#toggleTheme"/>
+    <Button fx:id="parentalModeButton" text="Parental Mode" onAction="#toggleParentalMode"/>
+<!--    <Button fx:id="minimalistModeButton" text="Minimalist Mode" onAction="#toggleMinimalistMode"/>-->
+
+</VBox>
+
+
