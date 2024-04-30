@@ -33,16 +33,17 @@ import static com.mongodb.client.model.Filters.*;
 
 
 public class Indexer{
-    private final String connectionString = "mongodb+srv://alexludford3:m30zNpl8vvsC1Biw@jdevbrowser.zxlsuec.mongodb.net/?retryWrites=true&w=majority&appName=JDevBrowser";
-    private JDevDocument Doc;
-    private StanfordCoreNLP pipeline;
-
-    static Logger logger = Logger.getLogger(Indexer.class.getName());
     public static Set<String> STOP_WORDS = Set.of("a", "an", "and", "are", "as", "at", "be", "but", "by",
             "for", "if", "in", "into", "is", "it",
             "no", "not", "of", "on", "or", "s", "such",
             "t", "that", "the", "their", "then", "there", "these",
             "they", "this", "to", "was", "will", "with");
+
+    private final String connectionString = "mongodb+srv://alexludford3:m30zNpl8vvsC1Biw@jdevbrowser.zxlsuec.mongodb.net/?retryWrites=true&w=majority&appName=JDevBrowser";
+    private final JDevDocument Doc;
+    private final StanfordCoreNLP pipeline;
+
+    static Logger logger = Logger.getLogger(Indexer.class.getName());
 
     public Indexer(JDevDocument Doc){
         Properties props = new Properties();
@@ -90,7 +91,7 @@ public class Indexer{
     }
 
     private List<String> tokenize(String corpus){
-        HashSet<String> tokenSet = new HashSet<String>();
+        HashSet<String> tokenSet = new HashSet<String>(); // keeps strings unique.
         List<String> tokenized = new ArrayList<>();
 
         Annotation annotation = new Annotation(corpus.toLowerCase());
