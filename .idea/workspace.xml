@@ -5,11 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8531299b-084b-4c82-ab76-7ef13284627c" name="Changes" comment="week 11">
-      <change afterPath="$PROJECT_DIR$/src/main/resources/com/example/cab302_week9/dark-theme.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/com/example/cab302_week9/light-theme.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/cab302_week9/BrowserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/cab302_week9/BrowserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/com/example/cab302_week9/BrowserUI.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/example/cab302_week9/BrowserUI.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -160,7 +156,15 @@
       <option name="project" value="LOCAL" />
       <updated>1715432108189</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="week 11">
+      <option name="closed" value="true" />
+      <created>1715507357662</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1715507357662</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
