@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.web.WebView?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.cab302_week9.BrowserController" stylesheets="@style.css">
+    <TabPane fx:id="browserTabPane" tabClosingPolicy="UNAVAILABLE">
+        <tabs>
+            <Tab text="Home">
+                <content>
+                    <VBox spacing="10">
+                        <HBox spacing="10" styleClass="input-group">
+                            <padding>
+                                <Insets top="10" right="10" bottom="10" left="10"/>
+                            </padding>
+                            <TextField fx:id="urlTextField" promptText="URL" styleClass="form-control" HBox.hgrow="ALWAYS"/>
+                            <Button text="Go" onAction="#loadPage"/>
+                            <Button text="History" onAction="#openHistory"/>
+                            <Button fx:id="loginButton" text="Login" onAction="#openLoginTab"/>
+                            <Button fx:id="registerButton" text="Register" onAction="#openRegisterTab"/>
+                            <Text fx:id="welcomeText" text="" visible="false" styleClass="welcome-text"/> <!-- Initially hidden -->
+
+
+                        </HBox>
+                        <StackPane VBox.vgrow="ALWAYS">
+                            <VBox alignment="CENTER" spacing="20">
+                                <Text fx:id="LogoText" styleClass="h1">JDev Browser</Text>
+                                <TextField fx:id="searchTextField" promptText="Search bar" maxWidth="500" styleClass="form-control"/>
+
+                            </VBox>
+                        </StackPane>
+
+                    </VBox>
+                </content>
+            </Tab>
+            <Tab text="+" onSelectionChanged="#handleAddTab"/>
+        </tabs>
+        <Tab text="History">
+            <content>
+                <AnchorPane>
+                    <ListView fx:id="historyListView" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
+                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"/>
+                </AnchorPane>
+            </content>
+        </Tab>
+
+        <Tab text="Login/Register">
+            <content>
+                <VBox spacing="10">
+                    <TextField fx:id="usernameField" promptText="Username"/>
+                    <PasswordField fx:id="passwordField" promptText="Password"/>
+                    <Button text="Login" onAction="#handleLogin"/>
+                    <Button text="Register" onAction="#handleRegister"/>
+
+                </VBox>
+            </content>
+        </Tab>
+
+    </TabPane>
+    <BorderPane VBox.vgrow="ALWAYS">
+        <top>
+            <HBox alignment="CENTER" spacing="10">
+                <CheckBox fx:id="simpleModeCheck" text="Simple Mode" onAction="#handleSimpleModeToggle"/>
+                <ToggleButton fx:id="themeToggle" text="Toggle Theme" onAction="#handleThemeToggle"/>
+            </HBox>
+        </top>
+        <bottom>
+            <HBox alignment="BOTTOM_LEFT" spacing="10" styleClass="input-group">
+                <TitledPane fx:id="expandableWidget" text="More Options" collapsible="true" animated="true">
+                    <VBox>
+                        <Label fx:id="clockLabel" text="00:00" styleClass="clock-label"/>
+                    </VBox>
+                </TitledPane>
+            </HBox>
+        </bottom>
+    </BorderPane>
+</VBox>
