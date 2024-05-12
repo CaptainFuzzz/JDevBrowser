@@ -8,7 +8,7 @@ module com.example.cab302_week9 {
     requires org.mongodb.bson;
     requires org.mongodb.driver.core;
     requires java.desktop;
-    requires stanford.corenlp;
+    
     requires jbcrypt;
 
 
