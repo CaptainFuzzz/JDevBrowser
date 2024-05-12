@@ -22,23 +22,23 @@ import javafx.util.Duration;
 import org.bson.Document;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.util.List;
 import java.util.Objects;
 
 public class BrowserController {
 
-    @FXML
-    public TabPane browserTabPane;
-    @FXML
-    private TextField urlTextField;
-    @FXML
-    public VBox expandableContent;
+    @FXML public TabPane browserTabPane;
+    @FXML private TextField urlTextField;
+    @FXML public VBox expandableContent;
     @FXML private Button loginButton;
     @FXML private Button registerButton;
     @FXML private Button themeToggleButton;
     @FXML private Text welcomeText;
-    @FXML boolean isDarkTheme = true;
     @FXML private CheckBox simpleModeToggle;
-    @FXML Timeline reminderTimeline;
+    @FXML private boolean isDarkTheme = true;
+    @FXML private Timeline reminderTimeline;
+    @FXML private boolean userLoggedIn = false;
+    @FXML private String currentUsername;
 
     public void updateTheme() {
         Scene scene = urlTextField.getScene();
@@ -100,9 +100,9 @@ public class BrowserController {
     }
     @FXML
     private void openHistory() {
-        ObservableList<String> history = getHistory();
+        ObservableList<String> history = FXCollections.observableArrayList(getHistory());
         ListView<String> historyView = new ListView<>(history);
-        Label titleLabel = new Label("JDev Browser"); // Title label
+        Label titleLabel = new Label("Browsing History");
         titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
         VBox historyLayout = new VBox(titleLabel, historyView);
@@ -133,17 +133,17 @@ public class BrowserController {
         errorMessageLabel.setVisible(false);
 
         loginButton.setOnAction(event -> {
-            if (usernameField.getText().isEmpty() || passwordField.getText().isEmpty()) {
+            String username = usernameField.getText();
+            String password = passwordField.getText();
+            if (username.isEmpty() || password.isEmpty()) {
                 errorMessageLabel.setText("Username and password are required.");
                 errorMessageLabel.setVisible(true);
             } else {
-                MongoDBUtil mongoDBUtil = new MongoDBUtil();
-                boolean isValidUser = mongoDBUtil.validateUser(usernameField.getText(), passwordField.getText());
-
-                if (isValidUser) {
-                    System.out.println("Login successful for: " + usernameField.getText());
-                    closeLoginTab("Login"); // Close the login tab
-                    updateUIPostLogin(usernameField.getText()); // Update UI to show logged in state
+                if (MongoDBUtil.validateUser(username, password)) {
+                    userLoggedIn = true;
+                    currentUsername = username;
+                    closeLoginTab("Login");
+                    updateUIPostLogin(username);
                 } else {
                     errorMessageLabel.setText("Invalid username or password.");
                     errorMessageLabel.setVisible(true);
@@ -252,28 +252,30 @@ public class BrowserController {
         return errorMessage;
     }
 
-    private ObservableList<String> getHistory() {
-        // mock data first
-        return FXCollections.observableArrayList(
-                "http://example.com",
-                "http://google.com",
-                "http://openai.com"
-        );
+    private List<String> getHistory() {
+        if (userLoggedIn) {
+            return MongoDBUtil.fetchHistory(currentUsername);
+        }
+        return List.of("No history available or not logged in.");
     }
     @FXML
     private void loadPage() {
         String url = urlTextField.getText().trim();
-        if (!url.isEmpty()) { // Check if the URL is not empty
+        if (!url.isEmpty()) {
             if (!url.startsWith("http://") && !url.startsWith("https://")) {
-                url = "http://" + url; // Append "http://" if not present
+                url = "http://" + url;
             }
             WebView webView = new WebView();
             webView.getEngine().load(url);
 
-            Tab newTab = new Tab("New Tab"); // Create a new tab
+            Tab newTab = new Tab("New Tab");
             newTab.setContent(webView);
             browserTabPane.getTabs().add(newTab);
-            browserTabPane.getSelectionModel().select(newTab); // Select the newly added tab
+            browserTabPane.getSelectionModel().select(newTab);
+
+            if (userLoggedIn) {
+                MongoDBUtil.storeHistory(currentUsername, url);
+            }
         } else {
             showAlert("Error", "Please enter a URL to load.");
         }
@@ -301,8 +303,15 @@ public class BrowserController {
         WebView webView = new WebView();
         webView.getEngine().load(url);
 
-        Tab newTab = new Tab(title);
-        newTab.setContent(webView);
-        browserTabPane.getTabs().add(browserTabPane.getTabs().size() - 1, newTab);
+        // Ensure the WebView stretches to fill the VBox
+        VBox container = new VBox(webView); // VBox is used to contain the WebView
+        VBox.setVgrow(webView, Priority.ALWAYS); // Make the WebView always grow vertically to fill available space
+
+        // Set the VBox to always grow and fill the space in the Tab
+        container.setFillWidth(true); // Make sure the VBox fills the width
+
+        Tab newTab = new Tab(title, container); // Directly set the container as the content of the Tab
+        browserTabPane.getTabs().add(browserTabPane.getTabs().size() - 1, newTab); // Insert the new Tab before the last tab
+        browserTabPane.getSelectionModel().select(newTab); // Select the newly added tab
     }
 }
