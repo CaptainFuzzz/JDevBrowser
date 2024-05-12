@@ -20,6 +20,9 @@
                             <Button text="History" onAction="#openHistory"/>
                             <Button fx:id="loginButton" text="Login" onAction="#openLoginTab"/>
                             <Button fx:id="registerButton" text="Register" onAction="#openRegisterTab"/>
+                            <CheckBox fx:id="simpleModeToggle" text="Enable Simple Mode" onAction="#toggleSimpleMode"/>
+                            <Button fx:id="themeToggleButton" text="Toggle Theme" onAction="#toggleTheme"/>
+
                             <Text fx:id="welcomeText" text="" visible="false" styleClass="welcome-text"/> <!-- Initially hidden -->
 
                         </HBox>

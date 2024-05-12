@@ -1,4 +1,8 @@
 package com.example.cab302_week9;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.event.ActionEvent;
+import javafx.scene.Scene;
 import javafx.scene.paint.Color;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -14,8 +18,11 @@ import javafx.scene.web.WebView;
 import javafx.scene.layout.VBox;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoCollection;
+import javafx.util.Duration;
 import org.bson.Document;
 import org.mindrot.jbcrypt.BCrypt;
+
+import java.util.Objects;
 
 public class BrowserController {
 
@@ -27,8 +34,31 @@ public class BrowserController {
     public VBox expandableContent;
     @FXML private Button loginButton;
     @FXML private Button registerButton;
+    @FXML private Button themeToggleButton;
     @FXML private Text welcomeText;
+    @FXML boolean isDarkTheme = true;
+    @FXML private CheckBox simpleModeToggle;
+    @FXML Timeline reminderTimeline;
 
+    public void updateTheme() {
+        Scene scene = urlTextField.getScene();
+        if (scene != null) {
+            scene.getStylesheets().clear();
+            String cssFile = isDarkTheme ? "dark-theme.css" : "light-theme.css";
+            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource(cssFile)).toExternalForm());
+        }
+    }
+    @FXML
+    public void initialize() {
+        setupReminder();
+        updateTheme();
+    }
+    @FXML
+    private void toggleSimpleMode(ActionEvent event) {
+        simpleModeToggle.setSelected(!simpleModeToggle.isSelected());
+        setupReminder();
+        updateTheme();
+    }
     @FXML
     public void toggleExpansion() {
         boolean isVisible = expandableContent.isVisible();
@@ -39,6 +69,34 @@ public class BrowserController {
     private void showWelcomeMessage(String username) {
         welcomeText.setText("Welcome, " + username + "!");
         welcomeText.setVisible(true); // Make the welcome text visible
+    }
+
+    @FXML
+    private void setupReminder() {
+        if (simpleModeToggle.isSelected()) {
+            if (reminderTimeline != null) {
+                reminderTimeline.stop();
+            }
+            return;
+        }
+        KeyFrame reminderFrame = new KeyFrame(Duration.hours(1), event -> showReminder());
+        reminderTimeline = new Timeline(reminderFrame);
+        reminderTimeline.setCycleCount(Timeline.INDEFINITE);
+        reminderTimeline.play();
+    }
+    @FXML
+    private void showReminder() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Take a break!");
+        alert.setHeaderText("Reminder");
+        alert.showAndWait();
+    }
+
+
+    @FXML
+    private void toggleTheme(ActionEvent event) {
+        if (simpleModeToggle.isSelected()) return; // Do nothing if simple mode is enabled
+        isDarkTheme = !isDarkTheme;
+        updateTheme();
     }
     @FXML
     private void openHistory() {
@@ -204,8 +262,30 @@ public class BrowserController {
     }
     @FXML
     private void loadPage() {
-        String url = urlTextField.getText();
-        addNewTab("New Tab", url);
+        String url = urlTextField.getText().trim();
+        if (!url.isEmpty()) { // Check if the URL is not empty
+            if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                url = "http://" + url; // Append "http://" if not present
+            }
+            WebView webView = new WebView();
+            webView.getEngine().load(url);
+
+            Tab newTab = new Tab("New Tab"); // Create a new tab
+            newTab.setContent(webView);
+            browserTabPane.getTabs().add(newTab);
+            browserTabPane.getSelectionModel().select(newTab); // Select the newly added tab
+        } else {
+            showAlert("Error", "Please enter a URL to load.");
+        }
+    }
+
+    // Helper method to show alerts
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     @FXML
