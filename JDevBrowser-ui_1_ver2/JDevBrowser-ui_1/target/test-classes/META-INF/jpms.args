@@ -1,0 +1,4 @@
+--patch-module
+com.example.cab302_week9=_
+--add-reads
+com.example.cab302_week9=ALL-UNNAMED
