@@ -5,21 +5,25 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.kordamp.bootstrapfx.BootstrapFX;
-import javafx.scene.text.Font;
-public class MainApp extends Application {
 
+public class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Font.loadFonts(getClass().getResourceAsStream("/Jersey20Charted-Regular.ttf"), 20);
-
-        Parent root = FXMLLoader.load(getClass().getResource("BrowserUI.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("BrowserUI.fxml")); // Load main UI
         Scene scene = new Scene(root);
-        scene.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
-
-        primaryStage.setTitle("Mindful Browser");
         primaryStage.setScene(scene);
         primaryStage.show();
+
+        showTimerWindow(); // Optionally, open the timer window on start
+    }
+
+    public void showTimerWindow() throws Exception {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("TimerWindow.fxml"));
+        Parent timerRoot = loader.load();
+        Stage timerStage = new Stage();
+        timerStage.setScene(new Scene(timerRoot));
+        timerStage.setTitle("Focus Timer");
+        timerStage.show();
     }
 
     public static void main(String[] args) {
