@@ -5,7 +5,7 @@
 <?import javafx.scene.web.WebView?>
 <?import javafx.geometry.Insets?>
 
-<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.cab302_week9.BrowserController" stylesheets="@style.css">
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:id="root" fx:controller="com.example.cab302_week9.BrowserController" stylesheets="@style.css">
     <TabPane fx:id="browserTabPane" tabClosingPolicy="UNAVAILABLE">
         <tabs>
             <Tab text="Home">
