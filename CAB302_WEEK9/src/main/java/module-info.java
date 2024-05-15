@@ -10,6 +10,7 @@ module com.example.cab302_week9 {
     requires java.desktop;
     
     requires jbcrypt;
+    requires eu.iamgio.animated;
 
 
     opens com.example.cab302_week9 to javafx.fxml;

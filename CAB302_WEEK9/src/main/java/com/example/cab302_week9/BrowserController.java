@@ -1,108 +1,62 @@
 package com.example.cab302_week9;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.event.ActionEvent;
-import javafx.scene.Scene;
-import javafx.scene.paint.Color;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.web.WebView;
-import javafx.scene.layout.VBox;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.MongoCollection;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.util.Duration;
-import org.bson.Document;
 import org.mindrot.jbcrypt.BCrypt;
-
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Objects;
 
 public class BrowserController {
 
-    @FXML public TabPane browserTabPane;
-    @FXML private TextField urlTextField;
-    @FXML public VBox expandableContent;
+    @FXML
+    TabPane browserTabPane;
+    @FXML
+    TextField urlTextField;
+    @FXML
+    private ListView<String> historyListView; // ListView for displaying history
+    @FXML
+    private TextField usernameField; // TextField for username input
+    @FXML
+    private PasswordField passwordField; // PasswordField for password input
+    @FXML
+    private Label clockLabel;
+    @FXML
+    private StackPane rootPane;
     @FXML private Button loginButton;
     @FXML private Button registerButton;
-    @FXML private Button themeToggleButton;
-    @FXML private Text welcomeText;
-    @FXML private CheckBox simpleModeToggle;
-    @FXML private boolean isDarkTheme = true;
-    @FXML private Timeline reminderTimeline;
-    @FXML private boolean userLoggedIn = false;
-    @FXML private String currentUsername;
+    @FXML
+    private ToggleButton toggleFilterButton;
+    @FXML
+    public Text welcomeText;
+    @FXML
+    private ToggleButton themeToggle;
+    @FXML
+    private CheckBox simpleModeCheck;
 
-    public void updateTheme() {
-        Scene scene = urlTextField.getScene();
-        if (scene != null) {
-            scene.getStylesheets().clear();
-            String cssFile = isDarkTheme ? "dark-theme.css" : "light-theme.css";
-            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource(cssFile)).toExternalForm());
-        }
-    }
-    @FXML
-    public void initialize() {
-        setupReminder();
-        updateTheme();
-    }
-    @FXML
-    private void toggleSimpleMode(ActionEvent event) {
-        simpleModeToggle.setSelected(!simpleModeToggle.isSelected());
-        setupReminder();
-        updateTheme();
-    }
-    @FXML
-    public void toggleExpansion() {
-        boolean isVisible = expandableContent.isVisible();
-        expandableContent.setVisible(!isVisible);
-        expandableContent.setManaged(!isVisible);
-    }
-    // Method to display a welcome message to the user
-    private void showWelcomeMessage(String username) {
-        welcomeText.setText("Welcome, " + username + "!");
-        welcomeText.setVisible(true); // Make the welcome text visible
-    }
+    boolean userLoggedIn = false;
+    private String currentUsername;
 
     @FXML
-    private void setupReminder() {
-        if (simpleModeToggle.isSelected()) {
-            if (reminderTimeline != null) {
-                reminderTimeline.stop();
-            }
-            return;
-        }
-        KeyFrame reminderFrame = new KeyFrame(Duration.hours(1), event -> showReminder());
-        reminderTimeline = new Timeline(reminderFrame);
-        reminderTimeline.setCycleCount(Timeline.INDEFINITE);
-        reminderTimeline.play();
-    }
-    @FXML
-    private void showReminder() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Take a break!");
-        alert.setHeaderText("Reminder");
-        alert.showAndWait();
-    }
-
-
-    @FXML
-    private void toggleTheme(ActionEvent event) {
-        if (simpleModeToggle.isSelected()) return; // Do nothing if simple mode is enabled
-        isDarkTheme = !isDarkTheme;
-        updateTheme();
-    }
-    @FXML
-    private void openHistory() {
-        ObservableList<String> history = FXCollections.observableArrayList(getHistory());
+    void openHistory() {
+        ObservableList<String> history = getHistory();
         ListView<String> historyView = new ListView<>(history);
-        Label titleLabel = new Label("Browsing History");
+        Label titleLabel = new Label("JDev Browser"); // Title label
         titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
         VBox historyLayout = new VBox(titleLabel, historyView);
@@ -113,19 +67,22 @@ public class BrowserController {
         browserTabPane.getTabs().add(historyTab);
         browserTabPane.getSelectionModel().select(historyTab);
     }
+
     @FXML
     public void openLoginTab() {
         VBox loginContent = new VBox(20);
         loginContent.setAlignment(Pos.CENTER);
         loginContent.setMaxWidth(300);
         loginContent.setStyle("-fx-padding: 20; -fx-background-color: #FFFFFF; -fx-border-color: #CCCCCC; -fx-border-radius: 5;");
-
+        TextField passwordField = new TextField();
         TextField usernameField = new TextField();
+        usernameField.setId("usernameField");
         usernameField.setPromptText("Username");
-        PasswordField passwordField = new PasswordField();
+        passwordField.setId("passwordField");
         passwordField.setPromptText("Password");
 
         Button loginButton = new Button("Login");
+        loginButton.setId("loginButton");
         loginButton.setStyle("-fx-background-color: #337ab7; -fx-text-fill: white;");
 
         Label errorMessageLabel = new Label();
@@ -133,17 +90,19 @@ public class BrowserController {
         errorMessageLabel.setVisible(false);
 
         loginButton.setOnAction(event -> {
-            String username = usernameField.getText();
-            String password = passwordField.getText();
-            if (username.isEmpty() || password.isEmpty()) {
+            if (usernameField.getText().isEmpty() || passwordField.getText().isEmpty()) {
                 errorMessageLabel.setText("Username and password are required.");
                 errorMessageLabel.setVisible(true);
             } else {
-                if (MongoDBUtil.validateUser(username, password)) {
+                MongoDBUtil mongoDBUtil = new MongoDBUtil();
+                boolean isValidUser = mongoDBUtil.validateUser(usernameField.getText(), passwordField.getText());
+
+                if (isValidUser) {
                     userLoggedIn = true;
-                    currentUsername = username;
-                    closeLoginTab("Login");
-                    updateUIPostLogin(username);
+                    currentUsername = usernameField.getText();
+                    System.out.println("Login successful for: " + currentUsername);
+                    closeLoginTab("Login"); // Close the login tab
+                    updateUIPostLogin(currentUsername); // Update UI to show logged in state
                 } else {
                     errorMessageLabel.setText("Invalid username or password.");
                     errorMessageLabel.setVisible(true);
@@ -161,12 +120,14 @@ public class BrowserController {
         browserTabPane.getTabs().add(loginTab);
         browserTabPane.getSelectionModel().select(loginTab);
     }
+
     private void updateUIPostLogin(String username) {
         welcomeText.setText("Welcome, " + username + "!");
         welcomeText.setVisible(true);
         loginButton.setVisible(false); // Hide the login button
         registerButton.setVisible(false); // Hide the register button
     }
+
     // Method to close the login tab
     private void closeLoginTab(String tabTitle) {
         browserTabPane.getTabs().stream()
@@ -178,25 +139,28 @@ public class BrowserController {
                 });
     }
 
-
-
-
     @FXML
-    private void openRegisterTab() {
+    void openRegisterTab() {
         VBox registerContent = new VBox(20);
         registerContent.setAlignment(Pos.CENTER);
         registerContent.setMaxWidth(300);
         registerContent.setStyle("-fx-padding: 20; -fx-background-color: #FFFFFF; -fx-border-color: #CCCCCC; -fx-border-radius: 5;");
 
         TextField usernameField = new TextField();
+        usernameField.setId("usernameField");
         usernameField.setPromptText("Username");
+
         PasswordField passwordField = new PasswordField();
+        passwordField.setId("passwordField");
         passwordField.setPromptText("Password");
         TextField emailField = new TextField();
+        emailField.setId("emailField");
         emailField.setPromptText("Email");
+
         Label errorLabel = new Label();
         errorLabel.setTextFill(Color.RED);
         Button registerButton = new Button("Register");
+        registerButton.setId("registerButton");
         registerButton.setStyle("-fx-background-color: #5cb85c; -fx-text-fill: white;");
 
         registerButton.setOnAction(event -> {
@@ -229,7 +193,7 @@ public class BrowserController {
         browserTabPane.getSelectionModel().select(registerTab);
     }
 
-    private String hashPassword(String plainTextPassword) {
+    String hashPassword(String plainTextPassword) {
         // Use a secure password hashing method, such as BCrypt
         return BCrypt.hashpw(plainTextPassword, BCrypt.gensalt());
     }
@@ -252,66 +216,131 @@ public class BrowserController {
         return errorMessage;
     }
 
-    private List<String> getHistory() {
+    private ObservableList<String> getHistory() {
         if (userLoggedIn) {
-            return MongoDBUtil.fetchHistory(currentUsername);
-        }
-        return List.of("No history available or not logged in.");
-    }
-    @FXML
-    private void loadPage() {
-        String url = urlTextField.getText().trim();
-        if (!url.isEmpty()) {
-            if (!url.startsWith("http://") && !url.startsWith("https://")) {
-                url = "http://" + url;
-            }
-            WebView webView = new WebView();
-            webView.getEngine().load(url);
-
-            Tab newTab = new Tab("New Tab");
-            newTab.setContent(webView);
-            browserTabPane.getTabs().add(newTab);
-            browserTabPane.getSelectionModel().select(newTab);
-
-            if (userLoggedIn) {
-                MongoDBUtil.storeHistory(currentUsername, url);
-            }
+            return FXCollections.observableArrayList(MongoDBUtil.fetchHistory(currentUsername));
         } else {
-            showAlert("Error", "Please enter a URL to load.");
+            return FXCollections.observableArrayList("No history available or not logged in.");
         }
-    }
-
-    // Helper method to show alerts
-    private void showAlert(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
     }
 
     @FXML
-    private void handleAddTab() {
-        // Only add a new tab if the "+" tab is selected
-        if (browserTabPane.getSelectionModel().getSelectedItem().getText().equals("+")) {
-            addNewTab("New Tab", "http://example.com");
-            browserTabPane.getSelectionModel().select(browserTabPane.getTabs().size() - 2);
+    private void initialize() {
+        startClock();
+        startReminder();
+        setupPlusTab();
+    }
+
+    private void setupPlusTab() {
+        Tab plusTab = new Tab("+");
+        plusTab.setClosable(false);
+        plusTab.setOnSelectionChanged(event -> {
+            if (plusTab.isSelected()) {
+                handleAddTab();
+            }
+        });
+
+        browserTabPane.getTabs().add(plusTab);
+    }
+
+    @FXML
+    void loadPage() {
+        String url = urlTextField.getText();
+        addNewTab("New Tab", url);
+        if (userLoggedIn) {
+            MongoDBUtil.storeHistory(currentUsername, url);
         }
+    }
+
+    @FXML
+    void handleAddTab() {
+        // Create a new WebView and Tab for the new content
+        WebView webView = new WebView();
+        webView.getEngine().load("http://example.com"); // Load a default or blank page
+
+        Tab newTab = new Tab("New Tab", webView);
+        setupCloseButton(newTab);
+
+        // Insert the new tab at the second-to-last position (before the '+' tab)
+        int newTabIndex = browserTabPane.getTabs().size() - 1;
+        browserTabPane.getTabs().add(newTabIndex, newTab);
+        browserTabPane.getSelectionModel().select(newTab);
+    }
+
+    private void setupCloseButton(Tab tab) {
+        // Create a button to close the tab
+        Button closeButton = new Button("x");
+        closeButton.setOnAction(event -> browserTabPane.getTabs().remove(tab));
+
+        // Create a container for the tab title and the close button
+        HBox tabHeader = new HBox(new Label(tab.getText()), closeButton);
+        tabHeader.setSpacing(5);
+        tabHeader.setAlignment(Pos.CENTER_LEFT);
+
+        // Set the custom header for the tab
+        tab.setGraphic(tabHeader);
+        tab.setText(null); // Optional: Clear the text if you're using the graphic as the title
     }
 
     private void addNewTab(String title, String url) {
         WebView webView = new WebView();
-        webView.getEngine().load(url);
+        webView.getEngine().load(url);  // Load the default URL
 
-        // Ensure the WebView stretches to fill the VBox
-        VBox container = new VBox(webView); // VBox is used to contain the WebView
-        VBox.setVgrow(webView, Priority.ALWAYS); // Make the WebView always grow vertically to fill available space
+        StackPane contentPane = new StackPane(webView);
+        contentPane.setStyle("-fx-padding: 10;");  // Optional padding
 
-        // Set the VBox to always grow and fill the space in the Tab
-        container.setFillWidth(true); // Make sure the VBox fills the width
+        Tab newTab = new Tab(title, contentPane);
 
-        Tab newTab = new Tab(title, container); // Directly set the container as the content of the Tab
-        browserTabPane.getTabs().add(browserTabPane.getTabs().size() - 1, newTab); // Insert the new Tab before the last tab
-        browserTabPane.getSelectionModel().select(newTab); // Select the newly added tab
+        // Insert the new tab at the second-to-last position (before the '+' tab)
+        browserTabPane.getTabs().add(browserTabPane.getTabs().size() - 1, newTab);
+        browserTabPane.getSelectionModel().select(newTab);
+    }
+
+    private void updateHistory(String url) {
+        historyListView.getItems().add(url);
+    }
+
+    private void startClock() {
+        Timeline clock = new Timeline(new KeyFrame(Duration.ZERO, e -> {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+            clockLabel.setText(LocalDateTime.now().format(formatter));
+        }), new KeyFrame(Duration.seconds(1)));
+        clock.setCycleCount(Timeline.INDEFINITE);
+        clock.play();
+    }
+
+    private void startReminder() {
+        Timeline reminder = new Timeline(new KeyFrame(Duration.hours(1), e -> showReminder()));
+        reminder.setCycleCount(Timeline.INDEFINITE);
+        reminder.play();
+    }
+
+    private void showReminder() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Exercise Reminder");
+        alert.setHeaderText("Time to exercise!");
+        alert.setContentText("Take a moment to stretch and move around.");
+        alert.showAndWait();
+    }
+
+    @FXML
+    private void handleThemeToggle() {
+        Scene scene = themeToggle.getScene();
+        if (themeToggle.isSelected()) {
+            scene.getStylesheets().clear();
+            scene.getStylesheets().add(getClass().getResource("dark-theme.css").toExternalForm());
+            themeToggle.setText("Switch to Light Theme");
+        } else {
+            scene.getStylesheets().clear();
+            scene.getStylesheets().add(getClass().getResource("light-theme.css").toExternalForm());
+            themeToggle.setText("Switch to Dark Theme");
+        }
+    }
+
+    @FXML
+    private void handleSimpleModeToggle() {
+        boolean isSimpleMode = simpleModeCheck.isSelected();
+        clockLabel.setVisible(!isSimpleMode);
+        themeToggle.setVisible(!isSimpleMode);
     }
 }

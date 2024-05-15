@@ -5,7 +5,7 @@
 <?import javafx.scene.web.WebView?>
 <?import javafx.geometry.Insets?>
 
-<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.cab302_week9.BrowserController" stylesheets="@style.css">
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:id="root" fx:controller="com.example.cab302_week9.BrowserController" stylesheets="@style.css">
     <TabPane fx:id="browserTabPane" tabClosingPolicy="UNAVAILABLE">
         <tabs>
             <Tab text="Home">
@@ -20,18 +20,18 @@
                             <Button text="History" onAction="#openHistory"/>
                             <Button fx:id="loginButton" text="Login" onAction="#openLoginTab"/>
                             <Button fx:id="registerButton" text="Register" onAction="#openRegisterTab"/>
-                            <CheckBox fx:id="simpleModeToggle" text="Enable Simple Mode" onAction="#toggleSimpleMode"/>
-                            <Button fx:id="themeToggleButton" text="Toggle Theme" onAction="#toggleTheme"/>
-
                             <Text fx:id="welcomeText" text="" visible="false" styleClass="welcome-text"/> <!-- Initially hidden -->
+
 
                         </HBox>
                         <StackPane VBox.vgrow="ALWAYS">
                             <VBox alignment="CENTER" spacing="20">
                                 <Text fx:id="LogoText" styleClass="h1">JDev Browser</Text>
                                 <TextField fx:id="searchTextField" promptText="Search bar" maxWidth="500" styleClass="form-control"/>
+
                             </VBox>
                         </StackPane>
+
                     </VBox>
                 </content>
             </Tab>
@@ -39,11 +39,17 @@
         </tabs>
     </TabPane>
     <BorderPane VBox.vgrow="ALWAYS">
+        <top>
+            <HBox alignment="CENTER" spacing="10">
+                <CheckBox fx:id="simpleModeCheck" text="Simple Mode" onAction="#handleSimpleModeToggle"/>
+                <ToggleButton fx:id="themeToggle" text="Toggle Theme" onAction="#handleThemeToggle"/>
+            </HBox>
+        </top>
         <bottom>
             <HBox alignment="BOTTOM_LEFT" spacing="10" styleClass="input-group">
                 <TitledPane fx:id="expandableWidget" text="More Options" collapsible="true" animated="true">
                     <VBox>
-                        <Label text="Timer placeholder" />
+                        <Label fx:id="clockLabel" text="00:00" styleClass="clock-label"/>
                     </VBox>
                 </TitledPane>
             </HBox>
