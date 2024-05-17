@@ -9,6 +9,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -54,9 +55,9 @@ public class BrowserController {
 
     @FXML
     void openHistory() {
-        ObservableList<String> history = getHistory();
+        ObservableList<String> history = FXCollections.observableArrayList(getHistory());
         ListView<String> historyView = new ListView<>(history);
-        Label titleLabel = new Label("JDev Browser"); // Title label
+        Label titleLabel = new Label("Browsing History");
         titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
         VBox historyLayout = new VBox(titleLabel, historyView);
@@ -82,7 +83,7 @@ public class BrowserController {
         passwordField.setPromptText("Password");
 
         Button loginButton = new Button("Login");
-        loginButton.setId("loginButton");
+        loginButton.setId("login");
         loginButton.setStyle("-fx-background-color: #337ab7; -fx-text-fill: white;");
 
         Label errorMessageLabel = new Label();
@@ -228,42 +229,63 @@ public class BrowserController {
     private void initialize() {
         startClock();
         startReminder();
-        setupPlusTab();
     }
 
-    private void setupPlusTab() {
-        Tab plusTab = new Tab("+");
-        plusTab.setClosable(false);
-        plusTab.setOnSelectionChanged(event -> {
-            if (plusTab.isSelected()) {
-                handleAddTab();
-            }
-        });
 
-        browserTabPane.getTabs().add(plusTab);
-    }
 
     @FXML
     void loadPage() {
-        String url = urlTextField.getText();
-        addNewTab("New Tab", url);
-        if (userLoggedIn) {
-            MongoDBUtil.storeHistory(currentUsername, url);
+        String url = urlTextField.getText().trim();
+        if (!url.isEmpty()) {
+            if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                url = "http://" + url;
+            }
+            WebView webView = new WebView();
+            webView.getEngine().load(url);
+
+            Tab newTab = new Tab("New Tab");
+            newTab.setContent(webView);
+            browserTabPane.getTabs().add(newTab);
+            browserTabPane.getSelectionModel().select(newTab);
+
+            if (userLoggedIn) {
+                MongoDBUtil.storeHistory(currentUsername, url);
+            }
+        } else {
+            showAlert("Error", "Please enter a URL to load.");
         }
+    }
+
+    // Helper method to show alerts
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     @FXML
     void handleAddTab() {
-        // Create a new WebView and Tab for the new content
+        // Only add a new tab if the "+" tab is selected
+        if (browserTabPane.getSelectionModel().getSelectedItem().getText().equals("+")) {
+            addNewTab("New Tab", "http://example.com");
+            browserTabPane.getSelectionModel().select(browserTabPane.getTabs().size() - 2);
+        }
+    }
+
+    private void addNewTab(String title, String url) {
         WebView webView = new WebView();
-        webView.getEngine().load("http://example.com"); // Load a default or blank page
+        webView.getEngine().load(url);
 
-        Tab newTab = new Tab("New Tab", webView);
-        setupCloseButton(newTab);
+        // Ensure the WebView stretches to fill the VBox
+        VBox container = new VBox(webView);
+        VBox.setVgrow(webView, Priority.ALWAYS);
 
-        // Insert the new tab at the second-to-last position (before the '+' tab)
-        int newTabIndex = browserTabPane.getTabs().size() - 1;
-        browserTabPane.getTabs().add(newTabIndex, newTab);
+        container.setFillWidth(true);
+
+        Tab newTab = new Tab(title, container);
+        browserTabPane.getTabs().add(browserTabPane.getTabs().size() - 1, newTab);
         browserTabPane.getSelectionModel().select(newTab);
     }
 
@@ -282,19 +304,7 @@ public class BrowserController {
         tab.setText(null); // Optional: Clear the text if you're using the graphic as the title
     }
 
-    private void addNewTab(String title, String url) {
-        WebView webView = new WebView();
-        webView.getEngine().load(url);  // Load the default URL
 
-        StackPane contentPane = new StackPane(webView);
-        contentPane.setStyle("-fx-padding: 10;");  // Optional padding
-
-        Tab newTab = new Tab(title, contentPane);
-
-        // Insert the new tab at the second-to-last position (before the '+' tab)
-        browserTabPane.getTabs().add(browserTabPane.getTabs().size() - 1, newTab);
-        browserTabPane.getSelectionModel().select(newTab);
-    }
 
     private void updateHistory(String url) {
         historyListView.getItems().add(url);

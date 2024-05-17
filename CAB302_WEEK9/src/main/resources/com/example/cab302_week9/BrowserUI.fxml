@@ -6,33 +6,27 @@
 <?import javafx.geometry.Insets?>
 
 <VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:id="root" fx:controller="com.example.cab302_week9.BrowserController" stylesheets="@style.css">
-    <TabPane fx:id="browserTabPane" tabClosingPolicy="UNAVAILABLE">
+    <HBox spacing="10" styleClass="input-group">
+        <padding>
+            <Insets top="10" right="10" bottom="10" left="10"/>
+        </padding>
+        <TextField fx:id="urlTextField" promptText="URL" styleClass="form-control" HBox.hgrow="ALWAYS"/>
+        <Button text="Go" onAction="#loadPage"/>
+        <Button text="History" onAction="#openHistory"/>
+        <Button fx:id="loginButton" text="Login" onAction="#openLoginTab"/>
+        <Button fx:id="registerButton" text="Register" onAction="#openRegisterTab"/>
+        <Text fx:id="welcomeText" text="" visible="false" styleClass="welcome-text"/> <!-- Initially hidden -->
+    </HBox>
+    <TabPane fx:id="browserTabPane" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
         <tabs>
             <Tab text="Home">
                 <content>
-                    <VBox spacing="10">
-                        <HBox spacing="10" styleClass="input-group">
-                            <padding>
-                                <Insets top="10" right="10" bottom="10" left="10"/>
-                            </padding>
-                            <TextField fx:id="urlTextField" promptText="URL" styleClass="form-control" HBox.hgrow="ALWAYS"/>
-                            <Button text="Go" onAction="#loadPage"/>
-                            <Button text="History" onAction="#openHistory"/>
-                            <Button fx:id="loginButton" text="Login" onAction="#openLoginTab"/>
-                            <Button fx:id="registerButton" text="Register" onAction="#openRegisterTab"/>
-                            <Text fx:id="welcomeText" text="" visible="false" styleClass="welcome-text"/> <!-- Initially hidden -->
-
-
-                        </HBox>
-                        <StackPane VBox.vgrow="ALWAYS">
-                            <VBox alignment="CENTER" spacing="20">
-                                <Text fx:id="LogoText" styleClass="h1">JDev Browser</Text>
-                                <TextField fx:id="searchTextField" promptText="Search bar" maxWidth="500" styleClass="form-control"/>
-
-                            </VBox>
-                        </StackPane>
-
-                    </VBox>
+                    <StackPane VBox.vgrow="ALWAYS">
+                        <VBox alignment="CENTER" spacing="20">
+                            <Text fx:id="LogoText" styleClass="h1">JDev Browser</Text>
+                            <TextField fx:id="searchTextField" promptText="Search bar" maxWidth="500" styleClass="form-control"/>
+                        </VBox>
+                    </StackPane>
                 </content>
             </Tab>
             <Tab text="+" onSelectionChanged="#handleAddTab"/>

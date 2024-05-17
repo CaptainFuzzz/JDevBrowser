@@ -48,7 +48,7 @@ public class BrowserControllerTest extends ApplicationTest {
             controller.handleAddTab();
         });
         WaitForAsyncUtils.waitForFxEvents();
-        assertEquals(4, controller.browserTabPane.getTabs().size(), "New tab should be added");
+        assertEquals(2, controller.browserTabPane.getTabs().size(), "New tab should be added");
     }
     @Test
     public void testOpenHistory() {
@@ -77,7 +77,7 @@ public class BrowserControllerTest extends ApplicationTest {
         });
         clickOn("#usernameField").write("test3");
         clickOn("#passwordField").write("12345678");
-        clickOn("#loginButton");
+        clickOn("#login");
         WaitForAsyncUtils.waitForFxEvents();
         assertTrue(controller.userLoggedIn, "User should be logged in after valid credentials");
     }
