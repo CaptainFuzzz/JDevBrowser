@@ -19,6 +19,8 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 import org.mindrot.jbcrypt.BCrypt;
+import webmaster.Searchengine;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -52,6 +54,7 @@ public class BrowserController {
 
     boolean userLoggedIn = false;
     private String currentUsername;
+    private final String mongoConnectionString = "mongodb+srv://alexludford3:RunydXriJx97r0fj@jdevbrowser.zxlsuec.mongodb.net";
 
     @FXML
     void openHistory() {
@@ -236,17 +239,40 @@ public class BrowserController {
     @FXML
     void loadPage() {
         String url = urlTextField.getText().trim();
+        Searchengine searchengine = new Searchengine(mongoConnectionString);
+        
         if (!url.isEmpty()) {
-            if (!url.startsWith("http://") && !url.startsWith("https://")) {
-                url = "http://" + url;
-            }
-            WebView webView = new WebView();
-            webView.getEngine().load(url);
 
-            Tab newTab = new Tab("New Tab");
-            newTab.setContent(webView);
-            browserTabPane.getTabs().add(newTab);
-            browserTabPane.getSelectionModel().select(newTab);
+            WebView webView = new WebView();
+
+            if (searchengine.urltest(url)){
+                if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                    url = "http://" + url;
+                }
+
+                webView.getEngine().load(url);
+
+                Tab newTab = new Tab("New Tab");
+                newTab.setContent(webView);
+                browserTabPane.getTabs().add(newTab);
+                browserTabPane.getSelectionModel().select(newTab);
+            }
+            else{
+                ObservableList<String> SearchResults = FXCollections.observableArrayList(searchengine.Search(url));
+                ListView<String> SearchView = new ListView<>(SearchResults);
+                Label titleLabel = new Label("Search Results");
+                titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+
+                VBox searchLayout = new VBox(titleLabel, SearchView);
+                searchLayout.setSpacing(10);
+                searchLayout.setPadding(new Insets(10));
+
+                Tab SearchResultTab = new Tab("Search Results", searchLayout);
+                browserTabPane.getTabs().add(SearchResultTab);
+                browserTabPane.getSelectionModel().select(SearchResultTab);
+            }
+
+
 
             if (userLoggedIn) {
                 MongoDBUtil.storeHistory(currentUsername, url);
