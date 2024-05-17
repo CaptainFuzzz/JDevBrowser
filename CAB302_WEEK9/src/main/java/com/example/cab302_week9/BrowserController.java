@@ -21,9 +21,13 @@ import com.mongodb.client.MongoCollection;
 import javafx.util.Duration;
 import org.bson.Document;
 import org.mindrot.jbcrypt.BCrypt;
+import webmaster.Searchengine;
 
+import javax.swing.*;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class BrowserController {
 
@@ -39,7 +43,8 @@ public class BrowserController {
     @FXML private Timeline reminderTimeline;
     @FXML private boolean userLoggedIn = false;
     @FXML private String currentUsername;
-
+    private final String mongoConnectionString = "mongodb+srv://alexludford3:RunydXriJx97r0fj@jdevbrowser.zxlsuec.mongodb.net";
+    static Logger logger = Logger.getLogger(BrowserController.class.getName());
     public void updateTheme() {
         Scene scene = urlTextField.getScene();
         if (scene != null) {
@@ -258,20 +263,44 @@ public class BrowserController {
         }
         return List.of("No history available or not logged in.");
     }
+
     @FXML
     private void loadPage() {
+        Searchengine searchengine = new Searchengine(mongoConnectionString);
+
         String url = urlTextField.getText().trim();
         if (!url.isEmpty()) {
-            if (!url.startsWith("http://") && !url.startsWith("https://")) {
-                url = "http://" + url;
-            }
-            WebView webView = new WebView();
-            webView.getEngine().load(url);
 
-            Tab newTab = new Tab("New Tab");
-            newTab.setContent(webView);
-            browserTabPane.getTabs().add(newTab);
-            browserTabPane.getSelectionModel().select(newTab);
+            WebView webView = new WebView();
+
+            if (searchengine.urltest(url)){
+                if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                    url = "http://" + url;
+                }
+
+                webView.getEngine().load(url);
+
+                Tab newTab = new Tab("New Tab");
+                newTab.setContent(webView);
+                browserTabPane.getTabs().add(newTab);
+                browserTabPane.getSelectionModel().select(newTab);
+            }
+            else{
+                ObservableList<String> SearchResults = FXCollections.observableArrayList(searchengine.Search(url));
+                ListView<String> SearchView = new ListView<>(SearchResults);
+                Label titleLabel = new Label("Search Results");
+                titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+
+                VBox searchLayout = new VBox(titleLabel, SearchView);
+                searchLayout.setSpacing(10);
+                searchLayout.setPadding(new Insets(10));
+
+                Tab SearchResultTab = new Tab("Search Results", searchLayout);
+                browserTabPane.getTabs().add(SearchResultTab);
+                browserTabPane.getSelectionModel().select(SearchResultTab);
+            }
+
+
 
             if (userLoggedIn) {
                 MongoDBUtil.storeHistory(currentUsername, url);
