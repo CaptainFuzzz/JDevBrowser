@@ -53,7 +53,7 @@ public class Searchengine {
         }
     }
     private String processInput(String SearchInput){
-        String Searchtext = "text=" + SearchInput.replace(" ", "%20");
+        String Searchtext = "text=" + SearchInput.replace(" ", "%20") + "&flag=ALL_TOKENS";
 
         try {
             HttpRequest request = HttpRequest.newBuilder()
@@ -68,9 +68,9 @@ public class Searchengine {
 
             JsonObject jobject = new JsonObject(response.body());
 
-            return jobject.toBsonDocument().get("lemma").toString()
-                    .replaceAll("[{}]", "").replaceAll(": \\d", "")
-                    .replaceAll(",",  "").replaceAll("\"", "");
+            return jobject.toBsonDocument().get("lemma").toString().replaceAll("BsonArray", "")
+                    .replaceAll("[{}]", "").replaceAll("BsonString", "").replaceAll("values=", "")
+                    .replaceAll("value=", "").replaceAll("'", "").replaceAll(",", "").replaceAll("[\\[\\]]", "");
 
         }
         catch (IOException | InterruptedException e){
@@ -101,9 +101,6 @@ public class Searchengine {
                     .replaceAll("[\\[\\]]", "")
                     .replaceAll(",", "").split(" ")));
 
-//            return Arrays.asList(result.next().get("commonSets").toString()
-//                    .replaceAll("[\\[\\]]", "").replaceAll(",", "")
-//                    .split(" "));
 
             return SearchResults;
         }

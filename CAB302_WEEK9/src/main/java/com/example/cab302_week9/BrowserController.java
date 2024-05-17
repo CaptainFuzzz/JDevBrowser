@@ -240,7 +240,7 @@ public class BrowserController {
     void loadPage() {
         String url = urlTextField.getText().trim();
         Searchengine searchengine = new Searchengine(mongoConnectionString);
-        
+
         if (!url.isEmpty()) {
 
             WebView webView = new WebView();
