@@ -2,7 +2,6 @@ package com.example.cab302_week9;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -21,9 +20,17 @@ import javafx.util.Duration;
 import org.mindrot.jbcrypt.BCrypt;
 import webmaster.Searchengine;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class BrowserController {
 
@@ -55,6 +62,17 @@ public class BrowserController {
     boolean userLoggedIn = false;
     private String currentUsername;
     private final String mongoConnectionString = "mongodb+srv://alexludford3:RunydXriJx97r0fj@jdevbrowser.zxlsuec.mongodb.net";
+
+    private static final Set<String> SENSITIVE_WORDS = new HashSet<>();
+
+    static {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                BrowserController.class.getResourceAsStream("/sensitiveword.txt")))) {
+            SENSITIVE_WORDS.addAll(reader.lines().map(String::trim).collect(Collectors.toSet()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @FXML
     void openHistory() {
@@ -176,8 +194,7 @@ public class BrowserController {
                 mongoDBUtil.registerUser(usernameField.getText(), emailField.getText(), hashedPassword);
 
                 System.out.println("User registered successfully");
-                errorLabel.setText(""); // Clear error message on successful registration
-                // Optional: Clear fields or redirect user
+                errorLabel.setText("");
                 usernameField.clear();
                 passwordField.clear();
                 emailField.clear();
@@ -198,7 +215,6 @@ public class BrowserController {
     }
 
     String hashPassword(String plainTextPassword) {
-        // Use a secure password hashing method, such as BCrypt
         return BCrypt.hashpw(plainTextPassword, BCrypt.gensalt());
     }
 
@@ -234,13 +250,26 @@ public class BrowserController {
         startReminder();
     }
 
-
+    private boolean containsSensitiveWord(String input) {
+        String[] words = input.toLowerCase().split("\\W+");
+        for (String word : words) {
+            if (SENSITIVE_WORDS.contains(word)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @FXML
     void loadPage() {
         String url = urlTextField.getText().trim();
+        if (containsSensitiveWord(url)) {
+            showAlert("Mindful Alert", "The URL contains sensitive words and cannot be loaded. Please consider using different words.");
+            return;
+        }
+
         Searchengine searchengine = new Searchengine(mongoConnectionString);
-        
+
         if (!url.isEmpty()) {
 
             WebView webView = new WebView();
@@ -252,14 +281,24 @@ public class BrowserController {
 
                 webView.getEngine().load(url);
 
-                Tab newTab = new Tab("New Tab");
-                newTab.setContent(webView);
+                Tab newTab = createTabWithCloseButton("New Tab", webView);
                 browserTabPane.getTabs().add(newTab);
                 browserTabPane.getSelectionModel().select(newTab);
             }
             else{
                 ObservableList<String> SearchResults = FXCollections.observableArrayList(searchengine.Search(url));
+                if (SearchResults.isEmpty()) {
+                    showAlert("Error", "No search results found.");
+                    return;
+                }
                 ListView<String> SearchView = new ListView<>(SearchResults);
+                SearchView.setOnMouseClicked(event -> {
+                    String selectedItem = SearchView.getSelectionModel().getSelectedItem();
+                    if (selectedItem != null) {
+                        urlTextField.setText(selectedItem);
+                        loadPage();
+                    }
+                });
                 Label titleLabel = new Label("Search Results");
                 titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
@@ -267,12 +306,10 @@ public class BrowserController {
                 searchLayout.setSpacing(10);
                 searchLayout.setPadding(new Insets(10));
 
-                Tab SearchResultTab = new Tab("Search Results", searchLayout);
+                Tab SearchResultTab = createTabWithCloseButton("Search Results", searchLayout);
                 browserTabPane.getTabs().add(SearchResultTab);
                 browserTabPane.getSelectionModel().select(SearchResultTab);
             }
-
-
 
             if (userLoggedIn) {
                 MongoDBUtil.storeHistory(currentUsername, url);
@@ -282,7 +319,36 @@ public class BrowserController {
         }
     }
 
-    // Helper method to show alerts
+
+    private Tab createTabWithCloseButton(String title, Object content) {
+        Tab tab = new Tab(title);
+        if (content instanceof WebView) {
+            tab.setContent((WebView) content);
+        } else if (content instanceof VBox) {
+            tab.setContent((VBox) content);
+        }
+
+        // Create a close button
+        Button closeButton = new Button("x");
+        closeButton.setOnAction(event -> browserTabPane.getTabs().remove(tab));
+
+
+        HBox tabHeader = new HBox(new Label(title), closeButton);
+        tabHeader.setSpacing(5);
+        tabHeader.setAlignment(Pos.CENTER_LEFT);
+
+
+        tab.setGraphic(tabHeader);
+        tab.setText(null);
+
+        // Add hover effect for close button
+        closeButton.setStyle("-fx-background-color: transparent;");
+        closeButton.setOnMouseEntered(event -> closeButton.setStyle("-fx-background-color: #ff0000;"));
+        closeButton.setOnMouseExited(event -> closeButton.setStyle("-fx-background-color: transparent;"));
+
+        return tab;
+    }
+
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
@@ -304,32 +370,16 @@ public class BrowserController {
         WebView webView = new WebView();
         webView.getEngine().load(url);
 
-        // Ensure the WebView stretches to fill the VBox
+
         VBox container = new VBox(webView);
         VBox.setVgrow(webView, Priority.ALWAYS);
 
         container.setFillWidth(true);
 
-        Tab newTab = new Tab(title, container);
+        Tab newTab = createTabWithCloseButton(title, container);
         browserTabPane.getTabs().add(browserTabPane.getTabs().size() - 1, newTab);
         browserTabPane.getSelectionModel().select(newTab);
     }
-
-    private void setupCloseButton(Tab tab) {
-        // Create a button to close the tab
-        Button closeButton = new Button("x");
-        closeButton.setOnAction(event -> browserTabPane.getTabs().remove(tab));
-
-        // Create a container for the tab title and the close button
-        HBox tabHeader = new HBox(new Label(tab.getText()), closeButton);
-        tabHeader.setSpacing(5);
-        tabHeader.setAlignment(Pos.CENTER_LEFT);
-
-        // Set the custom header for the tab
-        tab.setGraphic(tabHeader);
-        tab.setText(null); // Optional: Clear the text if you're using the graphic as the title
-    }
-
 
 
     private void updateHistory(String url) {

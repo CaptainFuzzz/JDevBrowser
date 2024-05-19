@@ -41,10 +41,18 @@
         </top>
         <bottom>
             <HBox alignment="BOTTOM_LEFT" spacing="10" styleClass="input-group">
-                <TitledPane fx:id="expandableWidget" text="More Options" collapsible="true" animated="true">
-                    <VBox>
-                        <Label fx:id="clockLabel" text="00:00" styleClass="clock-label"/>
-                    </VBox>
+                <TitledPane fx:id="expandableWidget" text="More Options" collapsible="true" animated="true" maxWidth="400" prefWidth="250" minWidth="200" maxHeight="400" prefHeight="300" minHeight="200">
+                    <padding>
+                        <Insets top="10" right="10" bottom="10" left="10"/>
+                    </padding>
+                    <BorderPane>
+                        <center>
+                            <Region BorderPane.alignment="CENTER" />
+                        </center>
+                        <bottom>
+                            <Label fx:id="clockLabel" text="00:00" styleClass="clock-label" BorderPane.alignment="CENTER"/>
+                        </bottom>
+                    </BorderPane>
                 </TitledPane>
             </HBox>
         </bottom>

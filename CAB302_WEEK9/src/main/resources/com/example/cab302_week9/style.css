@@ -33,7 +33,26 @@
      -fx-font-size: 20px;
      -fx-text-fill: #333;
  }
+.close-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: black;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+/* style.css */
+.large-titled-pane {
+    -fx-font-size: 20px;  /* Adjust this value to make the titled pane text larger */
+    -fx-padding: 20px;    /* Add padding to make the titled pane larger */
+}
 
+.large-clock {
+    -fx-font-size: 24px;  /* Adjust this value to make the clock larger */
+    -fx-font-weight: bold;
+}
+
+.close-button:hover {
+    -fx-background-color: #d3d3d3; /* Light gray shade */
+}
  .login-label {
     -fx-font-family: 'Jersey 25';
      -fx-font-size: 20px;

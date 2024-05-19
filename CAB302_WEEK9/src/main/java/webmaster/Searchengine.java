@@ -1,4 +1,5 @@
 package webmaster;
+
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -12,10 +13,11 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.regex.Pattern;
-import java.net.http.*;
 
 public class Searchengine {
     private String connectionstring;
@@ -26,17 +28,21 @@ public class Searchengine {
             "t", "that", "the", "their", "then", "there", "these",
             "they", "this", "to", "was", "will", "with");
 
-    public Searchengine(String connectionstring){
+    public Searchengine(String connectionstring) {
         this.connectionstring = connectionstring;
     }
 
-    public List<String> Search(String SearchInput){
-        return query(processInput(SearchInput));
+    public List<String> Search(String SearchInput) {
+        String processedInput = processInput(SearchInput);
+        if (processedInput == null) {
+            return Collections.emptyList();
+        }
+        return query(processedInput);
     }
 
-    public boolean urltest(String SearchInput){
+    public boolean urltest(String SearchInput) {
         Pattern pattern = Pattern.compile("^(http|https)://");
-        if (!pattern.matcher(SearchInput).find()){
+        if (!pattern.matcher(SearchInput).find()) {
             SearchInput = "https://" + SearchInput;
         }
 
@@ -47,12 +53,12 @@ public class Searchengine {
             connection.disconnect();
 
             return true;
-        }
-        catch (IOException e){
+        } catch (IOException e) {
             return false;
         }
     }
-    private String processInput(String SearchInput){
+
+    private String processInput(String SearchInput) {
         String Searchtext = "text=" + SearchInput.replace(" ", "%20");
 
         try {
@@ -67,23 +73,25 @@ public class Searchengine {
             HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
             JsonObject jobject = new JsonObject(response.body());
+            BsonDocument bsonDocument = jobject.toBsonDocument();
 
-            return jobject.toBsonDocument().get("lemma").toString()
-                    .replaceAll("[{}]", "").replaceAll(": \\d", "")
-                    .replaceAll(",",  "").replaceAll("\"", "");
-
-        }
-        catch (IOException | InterruptedException e){
+            if (bsonDocument.containsKey("lemma")) {
+                return bsonDocument.get("lemma").toString()
+                        .replaceAll("[{}]", "").replaceAll(": \\d", "")
+                        .replaceAll(",", "").replaceAll("\"", "");
+            } else {
+                System.out.println("Lemma not found in the response");
+                return null;
+            }
+        } catch (IOException | InterruptedException e) {
             System.out.println(e.toString());
-
             return null;
         }
     }
 
-    private List<String> query(String searchQuery){
+    private List<String> query(String searchQuery) {
         List<String> SearchResults = new ArrayList<>();
-        try (MongoClient mongoClient  = MongoClients.create(connectionstring)){
-
+        try (MongoClient mongoClient = MongoClients.create(connectionstring)) {
             MongoDatabase database = mongoClient.getDatabase("JDevBrowser");
             MongoCollection<Document> collection = database.getCollection("JDevSites");
 
@@ -96,33 +104,26 @@ public class Searchengine {
 
             Iterator<Document> result = collection.aggregate(Arrays.asList(match, group, project)).iterator();
 
-
-            SearchResults.addAll(Arrays.asList(result.next().get("commonSets").toString()
-                    .replaceAll("[\\[\\]]", "")
-                    .replaceAll(",", "").split(" ")));
-
-//            return Arrays.asList(result.next().get("commonSets").toString()
-//                    .replaceAll("[\\[\\]]", "").replaceAll(",", "")
-//                    .split(" "));
+            if (result.hasNext()) {
+                SearchResults.addAll(Arrays.asList(result.next().get("commonSets").toString()
+                        .replaceAll("[\\[\\]]", "")
+                        .replaceAll(",", "").split(" ")));
+            }
 
             return SearchResults;
-        }
-        catch (MongoException e){
+        } catch (MongoException e) {
             e.printStackTrace();
-
             return null;
         }
     }
 
-    private boolean invalidToken(String token){
+    private boolean invalidToken(String token) {
         return STOP_WORDS.contains(token) || token.matches("[\\p{Punct}\\d]+");
     }
 
     private static String getFullResponse(HttpURLConnection connection) throws IOException {
         StringBuilder fullResponseBuilder = new StringBuilder();
-
         return fullResponseBuilder.append(connection.getResponseCode()).append(" ")
                 .append(connection.getResponseMessage()).append("\n").toString();
     }
-
 }
