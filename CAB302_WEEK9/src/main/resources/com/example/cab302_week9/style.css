@@ -8,6 +8,7 @@
 
 .btn-primary {
 }
+
 .titled-pane > .title {
     -fx-padding: 3;
     -fx-font-size: 12;
@@ -17,44 +18,58 @@
     -fx-font-family: 'Jersey 25';
     -fx-font-size: 48px;
 }
+
 .welcome-text {
     font-size: 16px;
     font-weight: bold;
     color: #2c3e50; /* Dark blue color */
 }
+
 .history-title {
     font-family: 'Jersey25';
-        src: url('Jersey25-Regular.ttf');
- }
+    src: url('Jersey25-Regular.ttf');
+}
 
-
- .login-title {
+.login-title {
     -fx-font-family: 'Jersey 25';
-     -fx-font-size: 20px;
-     -fx-text-fill: #333;
- }
+    -fx-font-size: 20px;
+    -fx-text-fill: #333;
+}
+
 .close-button {
     -fx-background-color: transparent;
     -fx-text-fill: black;
     -fx-font-weight: bold;
     -fx-cursor: hand;
 }
-/* style.css */
+
 .large-titled-pane {
-    -fx-font-size: 20px;  /* Adjust this value to make the titled pane text larger */
-    -fx-padding: 20px;    /* Add padding to make the titled pane larger */
+    -fx-font-size: 20px;
+    -fx-padding: 20px;
 }
 
 .large-clock {
-    -fx-font-size: 24px;  /* Adjust this value to make the clock larger */
+    -fx-font-size: 48px;
     -fx-font-weight: bold;
+    -fx-text-fill: black;
+    -fx-effect: dropshadow(one-pass-box, black, 10, 0.5, 0, 0);
+    -fx-padding: 20px;
+    -fx-background-color: white;
+    -fx-border-color: black;
+    -fx-border-width: 2px;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-alignment: center;
+    -fx-font-family: 'Jersey 25', monospace;
+
 }
 
 .close-button:hover {
-    -fx-background-color: #d3d3d3; /* Light gray shade */
+    -fx-background-color: #d3d3d3;
 }
- .login-label {
+
+.login-label {
     -fx-font-family: 'Jersey 25';
-     -fx-font-size: 20px;
-     -fx-text-fill: #333;
- }
+    -fx-font-size: 20px;
+    -fx-text-fill: #333;
+}

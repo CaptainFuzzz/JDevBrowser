@@ -14,7 +14,7 @@ public class MainApp extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        showTimerWindow(); // Optionally, open the timer window on start
+        showTimerWindow();
     }
 
     public void showTimerWindow() throws Exception {
