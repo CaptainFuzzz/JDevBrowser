@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+        <?import javafx.scene.control.*?>
+        <?import javafx.scene.layout.*?>
+        <?import javafx.scene.text.Text?>
+        <?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:id="root" fx:controller="com.example.cab302_week9.BrowserController" stylesheets="@style.css">
+<top>
+    <HBox spacing="10" styleClass="input-group">
+        <padding>
+            <Insets top="10" right="10" bottom="10" left="10"/>
+        </padding>
+        <TextField fx:id="urlTextField" promptText="URL" styleClass="form-control" HBox.hgrow="ALWAYS"/>
+        <Button text="Go" onAction="#loadPage"/>
+        <Button text="History" onAction="#openHistory"/>
+        <Button fx:id="loginButton" text="Login" onAction="#openLoginTab"/>
+        <Button fx:id="registerButton" text="Register" onAction="#openRegisterTab"/>
+        <Text fx:id="welcomeText" text="" visible="false" styleClass="welcome-text"/> <!-- Initially hidden -->
+        <CheckBox fx:id="simpleModeCheck" text="Simple Mode" onAction="#handleSimpleModeToggle"/>
+        <ToggleButton fx:id="themeToggle" text="Toggle Theme" onAction="#handleThemeToggle"/>
+    </HBox>
+</top>
+<center>
+    <StackPane>
+        <TabPane fx:id="browserTabPane" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+            <tabs>
+                <Tab text="Home">
+                    <content>
+                        <StackPane VBox.vgrow="ALWAYS">
+                            <VBox alignment="CENTER" spacing="20">
+                                <Text fx:id="LogoText" styleClass="h1">JDev Browser</Text>
+                                <TextField fx:id="searchTextField" promptText="Search bar" maxWidth="500" styleClass="form-control"/>
+                            </VBox>
+                        </StackPane>
+                    </content>
+                </Tab>
+                <Tab text="+" onSelectionChanged="#handleAddTab"/>
+            </tabs>
+        </TabPane>
+        <TitledPane fx:id="expandableWidget" text="More Options" collapsible="true" animated="true" maxWidth="400" prefWidth="250" minWidth="200" maxHeight="400" prefHeight="300" minHeight="200" StackPane.alignment="TOP_RIGHT">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <VBox alignment="CENTER" spacing="10">
+                <Region VBox.vgrow="ALWAYS"/>
+                <Label fx:id="clockLabel" text="00:00" styleClass=" large-clock" alignment="CENTER"/>
+
+                <ToggleButton fx:id="parentalModeToggle" text="Parental Mode" onAction="#onParentalModeToggle"/>
+                <Region VBox.vgrow="ALWAYS"/>
+            </VBox>
+        </TitledPane>
+    </StackPane>
+</center>
+</BorderPane>
