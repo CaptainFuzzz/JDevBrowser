@@ -73,3 +73,25 @@
     -fx-font-size: 20px;
     -fx-text-fill: #333;
 }
+.bookmark-list {
+    -fx-background-color: #f0f0f0;
+    -fx-border-color: #dcdcdc;
+    -fx-border-radius: 10px;
+    -fx-padding: 10px;
+}
+
+.bookmark-list .list-cell {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #dcdcdc;
+    -fx-padding: 10px;
+    -fx-font-family: 'Courier New', monospace;
+    -fx-font-size: 14px;
+}
+
+.bookmark-list .list-cell:hover {
+    -fx-background-color: #e0e0e0;
+}
+
+.bookmark-list .list-cell:focused {
+    -fx-background-color: #d0d0d0;
+}

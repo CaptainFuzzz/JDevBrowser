@@ -58,6 +58,8 @@ public class BrowserController {
     private ToggleButton themeToggle;
     @FXML
     private CheckBox simpleModeCheck;
+    @FXML
+    private ListView<String> bookmarkListView; // ListView for displaying bookmarks
 
     boolean userLoggedIn = false;
     private String currentUsername;
@@ -148,6 +150,7 @@ public class BrowserController {
         welcomeText.setVisible(true);
         loginButton.setVisible(false); // Hide the login button
         registerButton.setVisible(false); // Hide the register button
+        loadBookmarks(); // Load bookmarks when the user logs in
     }
 
     // Method to close the login tab
@@ -248,6 +251,9 @@ public class BrowserController {
     private void initialize() {
         startClock();
         startReminder();
+        if (userLoggedIn) {
+            loadBookmarks(); // Load bookmarks on initialization if the user is already logged in
+        }
     }
 
     private boolean containsSensitiveWord(String input) {
@@ -428,5 +434,19 @@ public class BrowserController {
         boolean isSimpleMode = simpleModeCheck.isSelected();
         clockLabel.setVisible(!isSimpleMode);
         themeToggle.setVisible(!isSimpleMode);
+    }
+
+    private void loadBookmarks() {
+        List<String> history = MongoDBUtil.fetchHistory(currentUsername);
+        Set<String> uniqueUrls = new HashSet<>(history);
+        ObservableList<String> bookmarks = FXCollections.observableArrayList(uniqueUrls);
+        bookmarkListView.setItems(bookmarks);
+        bookmarkListView.setOnMouseClicked(event -> {
+            String selectedItem = bookmarkListView.getSelectionModel().getSelectedItem();
+            if (selectedItem != null) {
+                urlTextField.setText(selectedItem);
+                loadPage();
+            }
+        });
     }
 }

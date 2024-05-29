@@ -29,7 +29,6 @@
                             <StackPane VBox.vgrow="ALWAYS">
                                 <VBox alignment="CENTER" spacing="20">
                                     <Text fx:id="LogoText" styleClass="h1">JDev Browser</Text>
-                                    <TextField fx:id="searchTextField" promptText="Search bar" maxWidth="500" styleClass="form-control"/>
                                 </VBox>
                             </StackPane>
                         </content>
